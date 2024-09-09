@@ -1,93 +1,99 @@
 from datetime import datetime
 
+
+def is_leap_year(year):
+    return ((year % 4 == 0 and year % 100 != 0)
+            or (year % 400 == 0))
+
+
+def get_star_sign(day, month, year):
+    if month == 2 and day > 29:
+        return "Invalid date for February"
+    if month == 2 and day == 29 and not is_leap_year(year):
+        return "Invalid date: Not a leap year"
+
+    if month == 12:
+        return 'Sagittarius' if (day < 22) else 'Capricorn'
+    elif month == 1:
+        return 'Capricorn' if (day < 20) else 'Aquarius'
+    elif month == 2:
+        return 'Aquarius' if (day < 19) else 'Pisces'
+    elif month == 3:
+        return 'Pisces' if (day < 21) else 'Aries'
+    elif month == 4:
+        return 'Aries' if (day < 20) else 'Taurus'
+    elif month == 5:
+        return 'Taurus' if (day < 21) else 'Gemini'
+    elif month == 6:
+        return 'Gemini' if (day < 21) else 'Cancer'
+    elif month == 7:
+        return 'Cancer' if (day < 23) else 'Leo'
+    elif month == 8:
+        return 'Leo' if (day < 23) else 'Virgo'
+    elif month == 9:
+        return 'Virgo' if (day < 23) else 'Libra'
+    elif month == 10:
+        return 'Libra' if (day < 23) else 'Scorpio'
+    elif month == 11:
+        return 'Scorpio' if (day < 22) else 'Sagittarius'
+    return 'Unknown'
+
+
+def get_chinese_zodiac(year):
+    zodiac_animals = [
+        'Monkey', 'Rooster', 'Dog', 'Pig', 'Rat',
+        'Ox', 'Tiger', 'Rabbit', 'Dragon', 'Snake',
+        'Horse', 'Goat']
+    return zodiac_animals[year % 12]
+
+
 now = datetime.now()
-current_date = now.strftime("%d/%m/%Y")
-hour = now.strftime("%c")
-hour = hour.split(" ")
-hour = hour[-2]
-hour = hour.split(":")
-hour_now = int(hour[0])
-min_now = int(hour[1])
-sec_now = int(hour[2])
 
 try:
-    DOB = input("please enter your date of birth : Day / Month /Year :")
-    burn_time = input('what time have your burn in the day : hour (00-24) / minute(00-60) / sec ')
+    dob_str = input("Please enter your date of birth "
+                    "(Day/Month/Year): ")
+    birth_time_str = input("What time were you born "
+                           "(Hour(00-24)/Minute(00-60)/Second): ")
 
-    burn_time = burn_time.split("/")
-    today = current_date.split("/")
-    birth_hour = int(burn_time[0])
-    birth_min = int(burn_time[1])
-    birth_sec = int(burn_time[2])
-    today_day = int(today[0])
-    today_month = int(today[1])
-    today_year = int(today[2])
-    dob = DOB.split("/")
-    birth_day = int(dob[0])
-    birth_month = int(dob[1])
-    birth_year = int(dob[2])
-except:
-    print("invailed details")
+    dob = datetime.strptime(dob_str, "%d/%m/%Y")
+    birth_time = datetime.strptime(birth_time_str, "%H/%M/%S").time()
 
-try:
-    if 0 <= birth_day > 31 or 0 <= birth_month >= 13 or birth_day == " " or birth_month == " " or birth_year == " ":
-        print("you have entered wrong date of birth")
+    birth_datetime = datetime.combine(dob.date(), birth_time)
+
+    if birth_datetime > now:
+        print("You haven't been born yet!")
         exit()
-except:
-    print("something went wrong , please try again.")
-    exit()
-try:
-    if birth_hour >= 25 or birth_min >= 60 or birth_sec < 0:
-        print("you have entered wrong date of birth time")
-        exit()
-except:
-    print("something went wrong , please try again.")
-    exit()
 
-burn_hour = 0
-burn_min = 0
-burn_sec = 0
-year = 0
-month = 0
-day = 0
-if hour_now >= birth_hour:
-    hour = hour_now - birth_hour
-else:
-    hour = 24 - birth_hour + hour_now
-    day -= 1
-if min_now >= birth_min:
-    minute = min_now - birth_min
-else:
-    minute = 60 - birth_min + min_now
-    hour -= 1
-if sec_now >= birth_sec:
-    second = sec_now - birth_sec
-else:
-    second = 60 - birth_sec + sec_now
-    hour -= 1
-if today_year >= birth_year:
-    year = today_year - birth_year
+    age_years = now.year - dob.year
+    age_months = now.month - dob.month
+    age_days = now.day - dob.day
 
-if today_month >= birth_month:
-    month = today_month - birth_month
-else:
-    month = 12 - birth_month + today_month
-    year -= 1
-if today_day >= birth_day:
-    day = today_day - birth_day  # "25/12/1995"
-else:
-    if today_month == 3 and ((today_year % 4 == 0 and today_year % 100 != 0) or (today_year % 400 == 0)):
-        day = 29 - birth_day + today_day
-    else:
-        day = (30 if today_month in [4, 6, 9, 11] else 31) - birth_day + today_day
-        month -= 1
-try:
-    if year == 0 and month == 0 and day == 0 or year < 0:
-        print("you  have not burn yet")
-        exit()
-except:
-    print("somthing went wrong , please try again.")
-    exit()
-if year >= 0 or month >= 0 or day > 0:
-    print(f"""you are {day} days  {month} months {year} years old """)
-    print(f"""you are {hour} hours  {minute} minutes {second} seconds  """)
+    if age_days < 0:
+        age_months -= 1
+        if now.month == 3 and is_leap_year(now.year):
+            age_days += 29
+        else:
+            age_days += (30 if now.month in [4, 6, 9, 11] else 31)
+
+    if age_months < 0:
+        age_years -= 1
+        age_months += 12
+
+    time_diff = now - birth_datetime
+    total_seconds = time_diff.total_seconds()
+    hours = int(total_seconds // 3600 % 24)
+    minutes = int(total_seconds // 60 % 60)
+    seconds = int(total_seconds % 60)
+
+    star_sign = get_star_sign(dob.day, dob.month, dob.year)
+    chinese_zodiac = get_chinese_zodiac(dob.year)
+
+    print(f"\nYou are {age_years} years, "
+          f"{age_months} months, and {age_days} days old.")
+    print(f"With exact time of: {hours} hours, "
+          f"{minutes} minutes, and {seconds} seconds.")
+    print(f"Your star sign is: {star_sign}")
+    print(f"Your Chinese Zodiac sign is: {chinese_zodiac}")
+
+except ValueError:
+    print("Invalid date or time format! Please try again.")
